@@ -61,24 +61,24 @@ def generate_answer(*, instruction: str, question: str, config: ModelConfig) -> 
     return (content or "").strip()
 
 
-def parse_model_specs(specs: Iterable[str]) -> list[ModelConfig]:
-    """Parse specs like 'openai:gpt-4.1-mini'."""
-    parsed: list[ModelConfig] = []
-    for raw in specs:
-        value = raw.strip()
-        if not value:
+def parse_model_specs(model_specs: Iterable[str]) -> list[ModelConfig]:
+    """Parse model specs like 'openai:gpt-4.1-mini'."""
+    parsed_configs: list[ModelConfig] = []
+    for raw_spec in model_specs:
+        spec_value = raw_spec.strip()
+        if not spec_value:
             continue
-        if ":" not in value:
+        if ":" not in spec_value:
             raise ValueError(
-                f"Invalid model spec '{value}'. Expected format 'provider:model'."
+                f"Invalid model spec '{spec_value}'. Expected format 'provider:model'."
             )
-        provider, model = value.split(":", 1)
+        provider, model = spec_value.split(":", 1)
         provider = provider.strip().lower()
         model = model.strip()
-        parsed.append(ModelConfig(provider=provider, model=model))
-    if not parsed:
+        parsed_configs.append(ModelConfig(provider=provider, model=model))
+    if not parsed_configs:
         raise ValueError("No valid model specs were provided.")
-    return parsed
+    return parsed_configs
 
 
 def default_model_configs() -> list[ModelConfig]:
@@ -90,5 +90,5 @@ def default_model_configs() -> list[ModelConfig]:
             "openrouter:anthropic/claude-3.5-haiku"
         ),
     )
-    specs = [s for s in env_specs.split(",") if s.strip()]
-    return parse_model_specs(specs)
+    model_specs = [model_spec for model_spec in env_specs.split(",") if model_spec.strip()]
+    return parse_model_specs(model_specs)

@@ -44,18 +44,18 @@ def get_conditions() -> list[Condition]:
 
 
 def load_prompts(csv_path: Path) -> list[PromptRow]:
-    with csv_path.open(newline="", encoding="utf-8") as f:
-        reader = csv.DictReader(f)
-        rows: list[PromptRow] = []
-        for r in reader:
-            rows.append(
+    with csv_path.open(newline="", encoding="utf-8") as csv_file:
+        reader = csv.DictReader(csv_file)
+        prompt_rows: list[PromptRow] = []
+        for row_data in reader:
+            prompt_rows.append(
                 PromptRow(
-                    id=int(r["id"]),
-                    category=(r.get("category") or "").strip(),
-                    prompt=(r.get("prompt") or "").strip(),
+                    id=int(row_data["id"]),
+                    category=(row_data.get("category") or "").strip(),
+                    prompt=(row_data.get("prompt") or "").strip(),
                 )
             )
-    return rows
+    return prompt_rows
 
 
 def iter_eval_items(
