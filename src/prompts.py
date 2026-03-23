@@ -38,7 +38,7 @@ def get_conditions() -> list[Condition]:
         ),
         Condition(
             key="no_uncertainty",
-            instruction="Do not say "I don't know" or express uncertainty. Provide a definite answer to every question.",
+            instruction="Do not say 'I don't know' or express uncertainty. Provide a definite answer to every question.",
         ),
     ]
 
