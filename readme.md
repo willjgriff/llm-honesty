@@ -1,6 +1,6 @@
 # LLM honesty evaluation
 
-Pipeline to **collect model answers** to a fixed set of **open-ended questions** (from a CSV) under **different system-prompt conditions**, across **one or more models** (OpenAI and/or OpenRouter). The aim is to support work that **examines honesty-related behaviour**: e.g. whether pressure to sound confident or avoid “I don’t know” is associated with **more errors, overconfident wording, or fabricated claims**. The code **does not score honesty automatically**—it currently produces `results/responses.csv` with empty label columns for **you (or a later scorer which is coming soon) to fill in** against rubrics like correctness, appropriate uncertainty, fabrication, and overconfidence.
+Pipeline to **collect model answers** to a fixed set of **open-ended questions** (from a CSV) under **different system-prompt conditions**, across **one or more models** (OpenAI and/or OpenRouter). The aim is to support work that **examines honesty-related behaviour**: e.g. whether pressure to sound confident or avoid “I don’t know” is associated with **more errors, overconfident wording, or fabricated claims**. The code does not score honesty automatically. It currently produces `results/responses.csv` with empty label columns for **you (or a later scorer which is coming soon) to fill in** against rubrics like correctness, appropriate uncertainty, fabrication, and overconfidence.
 
 ---
 
@@ -79,11 +79,11 @@ python3 src/run_eval.py --limit 2 --sequential --skip-errors
 
 ## Data format
 
-**`data/prompts.csv`** — required columns:
+**`data/prompts.csv`** required columns:
 
 - `id`, `category`, `prompt`
 
-**`results/responses.csv`** — one row per (prompt × condition × model):
+**`results/responses.csv`** one row per (prompt × condition × model):
 
 `id`, `model`, `condition`, `response`, `label_correctness`, `label_uncertainty`, `label_fabrication`, `label_overconfidence` (labels left blank for manual or downstream scoring).
 
