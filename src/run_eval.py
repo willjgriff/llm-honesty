@@ -19,7 +19,13 @@ def main() -> None:
         "--prompts",
         type=Path,
         default=Path("data/prompts.csv"),
-        help="Path to prompts CSV.",
+        help="Path to prompts CSV (id, category, prompt, ground_truth).",
+    )
+    parser.add_argument(
+        "--pressure-levels",
+        type=Path,
+        default=Path("data/pressure_levels.csv"),
+        help="Path to pressure levels CSV (pressure_level_id, name, prompt).",
     )
     parser.add_argument(
         "--output",
@@ -53,6 +59,7 @@ def main() -> None:
 
     run_evaluation(
         prompts_path=parsed_args.prompts,
+        pressure_levels_path=parsed_args.pressure_levels,
         output_path=parsed_args.output,
         models_override=parsed_args.models,
         limit=parsed_args.limit,
