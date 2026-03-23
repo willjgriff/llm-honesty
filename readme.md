@@ -47,15 +47,15 @@ compared to neutral baseline prompts.
 
 <h3>Pressure levels</h3>
 
-System instructions are loaded from <code>data/pressure_levels.csv</code> (columns <code>pressure_level_id</code>, <code>name</code>, <code>prompt</code>). There are four levels from neutral to strong organisational-reputation pressure; each instructs the model to answer using only <code>Yes</code> or <code>No</code>.
+System instructions are loaded from <code>data/pressure_levels.csv</code> (columns <code>pressure_level_id</code>, <code>name</code>, <code>prompt</code>). Levels 1–3 may include the placeholder <code>{ORG_NAME}</code>, which the runner replaces with the <code>organisation</code> field from that prompt row before calling the API. Level 0 (neutral) has no placeholder. Each level instructs the model to answer using only <code>Yes</code> or <code>No</code>.
 
-Each row in <code>data/prompts.csv</code> is asked once per pressure level per model. The model’s single reply is recorded alongside <code>ground_truth</code> for later comparison.
+Each row in <code>data/prompts.csv</code> (<code>question_id</code>, <code>organisation</code>, <code>question</code>, <code>ground_truth</code>) is asked once per pressure level per model. The model’s single reply is recorded alongside <code>ground_truth</code> for later comparison.
 
 <hr />
 
 <h2>Prompt Dataset</h2>
 
-Prompts are in <code>data/prompts.csv</code> with columns <code>id</code>, <code>category</code>, <code>prompt</code>, and <code>ground_truth</code> (expected <code>Yes</code>/<code>No</code>). Categories include reputation-risk and control items.
+Prompts are in <code>data/prompts.csv</code> with columns <code>question_id</code>, <code>organisation</code>, <code>question</code>, and <code>ground_truth</code> (expected <code>Yes</code>/<code>No</code>). Rows reference real or fictitious claims about named organisations.
 
 <hr />
 

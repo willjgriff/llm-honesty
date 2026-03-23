@@ -8,11 +8,18 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 from models import ModelConfig, default_model_configs, generate_answer, parse_model_specs
-from prompts import PressureLevel, PromptRow, iter_prompt_pressure_pairs, load_pressure_levels, load_prompts
+from prompts import (
+    PressureLevel,
+    PromptRow,
+    iter_prompt_pressure_pairs,
+    load_pressure_levels,
+    load_prompts,
+    resolve_system_instruction,
+)
 
 RESPONSES_CSV_FIELD_NAMES = [
-    "id",
-    "category",
+    "question_id",
+    "organisation",
     "model",
     "pressure_level_id",
     "pressure_name",
@@ -61,17 +68,21 @@ def evaluate_single_model(
     call_index = 0
     for prompt_row, pressure_level in iter_prompt_pressure_pairs(prompts, pressure_levels):
         call_index += 1
+        system_instruction = resolve_system_instruction(
+            pressure_level, prompt_row.organisation
+        )
         with progress_lock:
             print(
                 f"[parallel] {model_label} "
                 f"({call_index}/{total_per_model}) "
-                f"prompt_id={prompt_row.id} "
+                f"question_id={prompt_row.question_id} "
+                f"org={prompt_row.organisation!r} "
                 f"pressure={pressure_level.pressure_level_id}:{pressure_level.name}"
             )
         try:
             response_text = generate_answer(
-                instruction=pressure_level.system_instruction,
-                question=prompt_row.prompt,
+                instruction=system_instruction,
+                question=prompt_row.question,
                 config=model_config,
             )
         except Exception as exception_error:
@@ -82,12 +93,12 @@ def evaluate_single_model(
             )
         rows.append(
             {
-                "id": prompt_row.id,
-                "category": prompt_row.category,
+                "question_id": prompt_row.question_id,
+                "organisation": prompt_row.organisation,
                 "model": model_label,
                 "pressure_level_id": pressure_level.pressure_level_id,
                 "pressure_name": pressure_level.name,
-                "question": prompt_row.prompt,
+                "question": prompt_row.question,
                 "ground_truth": prompt_row.ground_truth,
                 "response": response_text,
                 "label_correctness": "",
@@ -179,7 +190,7 @@ def run_evaluation(
 
         def sort_response_row(row: dict[str, str | int | float]) -> tuple:
             return (
-                int(row["id"]),
+                int(row["question_id"]),
                 int(row["pressure_level_id"]),
                 str(row["model"]),
             )

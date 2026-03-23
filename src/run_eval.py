@@ -19,7 +19,7 @@ def main() -> None:
         "--prompts",
         type=Path,
         default=Path("data/prompts.csv"),
-        help="Path to prompts CSV (id, category, prompt, ground_truth).",
+        help="Path to prompts CSV (question_id, organisation, question, ground_truth).",
     )
     parser.add_argument(
         "--pressure-levels",
