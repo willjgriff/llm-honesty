@@ -43,20 +43,17 @@ def _get_client(config: ModelConfig) -> OpenAI:
     raise ValueError(f"Unsupported provider '{config.provider}'.")
 
 
-def generate_answer(*, instruction: str, question: str, config: ModelConfig) -> str:
-    """Call OpenAI chat completions and return the assistant text."""
+def generate_chat_completion(
+    *, messages: list[dict[str, str]], config: ModelConfig
+) -> str:
+    """Run one chat completion and return the assistant message text."""
     client = _get_client(config)
-
     responses = client.chat.completions.create(
         model=config.model,
         temperature=config.temperature,
         timeout=config.timeout_seconds,
-        messages=[
-            {"role": "system", "content": instruction},
-            {"role": "user", "content": question},
-        ],
+        messages=messages,
     )
-
     content = responses.choices[0].message.content
     return (content or "").strip()
 
