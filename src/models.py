@@ -12,27 +12,30 @@ from openai import OpenAI
 class ModelConfig:
     model: str
     temperature: float = 0.2
+    timeout_seconds: float = 20.0
+    max_retries: int = 0
 
 
-def _get_client() -> OpenAI:
+def _get_client(config: ModelConfig) -> OpenAI:
     # Uses OPENAI_API_KEY by default.
-    return OpenAI()
+    return OpenAI(timeout=config.timeout_seconds, max_retries=config.max_retries)
 
 
 def generate_answer(*, instruction: str, question: str, config: ModelConfig) -> str:
     """Call OpenAI chat completions and return the assistant text."""
-    client = _get_client()
+    client = _get_client(config)
 
-    resp = client.chat.completions.create(
+    responses = client.chat.completions.create(
         model=config.model,
         temperature=config.temperature,
+        timeout=config.timeout_seconds,
         messages=[
             {"role": "system", "content": instruction},
             {"role": "user", "content": question},
         ],
     )
 
-    content = resp.choices[0].message.content
+    content = responses.choices[0].message.content
     return (content or "").strip()
 
 

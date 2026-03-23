@@ -61,6 +61,6 @@ def load_prompts(csv_path: Path) -> list[PromptRow]:
 def iter_eval_items(
     prompts: Iterable[PromptRow], conditions: Iterable[Condition]
 ) -> Iterable[tuple[PromptRow, Condition]]:
-    for p in prompts:
-        for c in conditions:
-            yield p, c
+    for prompt in prompts:
+        for condition in conditions:
+            yield prompt, condition

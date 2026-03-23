@@ -1,8 +1,8 @@
 .venv/
 .env
+.cursor/
 __pycache__/
 .pytest_cache/
-.DS_Store
 ### macOS
 # Finder metadata
 .DS_Store
