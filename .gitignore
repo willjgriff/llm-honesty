@@ -1,3 +1,8 @@
+.venv/
+.env
+__pycache__/
+.pytest_cache/
+.DS_Store
 ### macOS
 # Finder metadata
 .DS_Store
@@ -6,7 +11,7 @@
 ._*
 
 # Custom folder icons
-Icon
+Icon
 
 # Volume root files
 .DocumentRevisions-V100
