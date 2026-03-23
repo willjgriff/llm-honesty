@@ -7,7 +7,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from models import default_model_config, generate_answer
+from models import default_model_configs, generate_answer, parse_model_specs
 from prompts import get_conditions, iter_eval_items, load_prompts
 
 
@@ -49,16 +49,21 @@ def main() -> None:
         help="Where to write responses CSV.",
     )
     parser.add_argument(
-        "--model",
+        "--models",
         type=str,
-        default=os.getenv("OPENAI_MODEL", ""),
-        help="Override model name (else uses OPENAI_MODEL).",
+        default=os.getenv("EVAL_MODELS", ""),
+        help="Comma-separated model specs like 'openai:gpt-4.1-mini,openrouter:meta-llama/llama-3.3-70b-instruct'.",
     )
     parser.add_argument(
         "--limit",
         type=int,
         default=0,
         help="If set > 0, only run the first N prompts.",
+    )
+    parser.add_argument(
+        "--skip-errors",
+        action="store_true",
+        help="If set, continue run when a model call fails and write error text to response.",
     )
     args = parser.parse_args()
 
@@ -67,26 +72,56 @@ def main() -> None:
         prompts = prompts[: args.limit]
 
     conditions = get_conditions()
-    config = default_model_config()
-    if args.model:
-        config = type(config)(model=args.model, temperature=config.temperature)
+    model_configs = default_model_configs()
+    if args.models:
+        model_configs = parse_model_specs(args.models.split(","))
+
+    total_per_model = len(prompts) * len(conditions)
+    total_expected = total_per_model * len(model_configs)
+    print(
+        "Starting evaluation: "
+        f"{len(prompts)} prompts x {len(conditions)} conditions x "
+        f"{len(model_configs)} models = {total_expected} calls"
+    )
 
     out_rows: list[dict[str, str | int | float]] = []
-    for prompt_row, condition in iter_eval_items(prompts, conditions):
-        text = generate_answer(
-            instruction=condition.instruction, question=prompt_row.prompt, config=config
-        )
-        out_rows.append(
-            {
-                "id": prompt_row.id,
-                "model": config.model,
-                "condition": condition.key,
-                "response": text,
-                "label_correctness": "",
-                "label_uncertainty": "",
-                "label_fabrication": "",
-                "label_overconfidence": "",
-            }
+    overall_count = 0
+    for model_idx, config in enumerate(model_configs, start=1):
+        print(f"Running model: {config.provider}:{config.model}")
+        model_count = 0
+        for prompt_row, condition in iter_eval_items(prompts, conditions):
+            model_count += 1
+            overall_count += 1
+            print(
+                f"[{overall_count}/{total_expected}] "
+                f"model {model_idx}/{len(model_configs)} "
+                f"prompt_id={prompt_row.id} condition={condition.key}"
+            )
+            try:
+                text = generate_answer(
+                    instruction=condition.instruction,
+                    question=prompt_row.prompt,
+                    config=config,
+                )
+            except Exception as exc:
+                if not args.skip_errors:
+                    raise
+                text = f"[ERROR] {type(exc).__name__}: {str(exc)}"
+            out_rows.append(
+                {
+                    "id": prompt_row.id,
+                    "model": f"{config.provider}:{config.model}",
+                    "condition": condition.key,
+                    "response": text,
+                    "label_correctness": "",
+                    "label_uncertainty": "",
+                    "label_fabrication": "",
+                    "label_overconfidence": "",
+                }
+            )
+        print(
+            f"Completed model {model_idx}/{len(model_configs)}: "
+            f"{config.provider}:{config.model} ({model_count}/{total_per_model} calls)"
         )
 
     write_responses_csv(output_path=args.output, rows=out_rows)
