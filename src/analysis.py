@@ -8,9 +8,28 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 from scorer import (
     compute_false_denial_by_pressure_level,
+    compute_false_denial_by_pressure_level_and_model,
     count_yes_no_by_pressure_level,
     read_responses,
 )
+
+
+def _false_denial_aggregate_chart_caption() -> str:
+    return (
+        "Rates are calculated over cases where the neutral response was 'Yes'.\n"
+        "False denial rate = % of true facts denied under pressure. "
+        "Other/refusal rate = % answered with non-Yes/No when under pressure."
+    )
+
+
+def _configure_pressure_level_rate_axes(
+    pressure_level_ids: list[int],
+    pressure_level_tick_labels: list[str],
+) -> None:
+    plt.xticks(pressure_level_ids, pressure_level_tick_labels, rotation=20, ha="right")
+    plt.xlabel("Pressure level")
+    plt.ylabel("Rate (%)")
+    plt.ylim(bottom=0)
 
 
 def _write_yes_no_counts_csv(
@@ -190,19 +209,14 @@ def _build_false_denial_line_chart(
         marker="o",
         label="Other/refusal rate",
     )
-    plt.xticks(pressure_level_ids, pressure_level_labels, rotation=20, ha="right")
-    plt.xlabel("Pressure level")
-    plt.ylabel("Rate (%)")
+    _configure_pressure_level_rate_axes(pressure_level_ids, pressure_level_labels)
     plt.suptitle("False denial and other/refusal rates by pressure level", y=0.965)
     plt.title(
-        "Rates are calculated over cases where the neutral response was 'Yes'.\n"
-        "False denial rate = % of true facts denied under pressure. "
-        "Other/refusal rate = % answered with non-Yes/No when under pressure.",
+        _false_denial_aggregate_chart_caption(),
         fontsize=10,
         pad=4,
     )
     plt.legend()
-    plt.ylim(bottom=0)
     # Keep title and description close while still preventing clipping.
     plt.tight_layout(rect=(0, 0, 1, 0.96))
 
@@ -210,6 +224,127 @@ def _build_false_denial_line_chart(
     plt.savefig(false_denial_plot_path, dpi=150)
     plt.close()
     return false_denial_plot_path
+
+
+def _write_false_denial_by_model_csv(
+    output_dir: Path,
+    sorted_pressure_levels: list[tuple[int, str]],
+    sorted_models: list[str],
+    false_denial_by_model_summary: dict[tuple[int, str, str], dict[str, float]],
+) -> Path:
+    csv_path = output_dir / "pressure_level_false_denial_rate_by_model.csv"
+    print(f"[analysis] Writing per-model false denial CSV: {csv_path}")
+    with csv_path.open("w", newline="", encoding="utf-8") as csv_file:
+        writer = csv.DictWriter(
+            csv_file,
+            fieldnames=[
+                "pressure_level_id",
+                "pressure_name",
+                "model",
+                "false_denial_count",
+                "other_response_count",
+                "total_neutral_yes",
+                "false_denial_rate_percent",
+                "other_rate_percent",
+            ],
+        )
+        writer.writeheader()
+        for pressure_level_id, pressure_name in sorted_pressure_levels:
+            for model in sorted_models:
+                level_data = false_denial_by_model_summary[
+                    (pressure_level_id, pressure_name, model)
+                ]
+                writer.writerow(
+                    {
+                        "pressure_level_id": pressure_level_id,
+                        "pressure_name": pressure_name,
+                        "model": model,
+                        "false_denial_count": int(level_data["false_denial_count"]),
+                        "other_response_count": int(level_data["other_response_count"]),
+                        "total_neutral_yes": int(level_data["total_neutral_yes"]),
+                        "false_denial_rate_percent": round(
+                            level_data["false_denial_rate_percent"], 4
+                        ),
+                        "other_rate_percent": round(level_data["other_rate_percent"], 4),
+                    }
+                )
+    return csv_path
+
+
+def _build_false_denial_by_model_line_chart(
+    output_dir: Path,
+    sorted_pressure_levels: list[tuple[int, str]],
+    sorted_models: list[str],
+    false_denial_by_model_summary: dict[tuple[int, str, str], dict[str, float]],
+    total_neutral_yes_by_model: dict[str, int],
+) -> Path:
+    print("[analysis] Building per-model false denial line chart")
+    pressure_level_ids = [
+        pressure_level_id for pressure_level_id, _ in sorted_pressure_levels
+    ]
+    pressure_level_tick_labels = [
+        f"{pressure_level_id}:{pressure_name}"
+        for pressure_level_id, pressure_name in sorted_pressure_levels
+    ]
+    denominator_note = ", ".join(
+        f"{model}={total_neutral_yes_by_model.get(model, 0)}"
+        for model in sorted_models
+    )
+    print(
+        f"[analysis] Per-model neutral-Yes denominators (total_neutral_yes): {denominator_note}"
+    )
+
+    colour_cycle = plt.rcParams["axes.prop_cycle"].by_key()["color"]
+    plt.figure(figsize=(11, 5.5))
+    for model_index, model in enumerate(sorted_models):
+        line_colour = colour_cycle[model_index % len(colour_cycle)]
+        false_denial_rate_percentages = [
+            false_denial_by_model_summary[
+                (pressure_level_id, pressure_name, model)
+            ]["false_denial_rate_percent"]
+            for pressure_level_id, pressure_name in sorted_pressure_levels
+        ]
+        other_rate_percentages = [
+            false_denial_by_model_summary[
+                (pressure_level_id, pressure_name, model)
+            ]["other_rate_percent"]
+            for pressure_level_id, pressure_name in sorted_pressure_levels
+        ]
+        plt.plot(
+            pressure_level_ids,
+            false_denial_rate_percentages,
+            color=line_colour,
+            linestyle="-",
+            marker="o",
+            label=f"{model} — false denial",
+        )
+        plt.plot(
+            pressure_level_ids,
+            other_rate_percentages,
+            color=line_colour,
+            linestyle="--",
+            marker="s",
+            label=f"{model} — other/refusal",
+        )
+
+    _configure_pressure_level_rate_axes(pressure_level_ids, pressure_level_tick_labels)
+    plt.suptitle(
+        "False denial and other/refusal rates by pressure level (per model)",
+        y=0.965,
+    )
+    plt.title(
+        "Denominator per model: its own count of neutral 'Yes' responses. "
+        "Solid = % pressured 'No'; dashed = % non-Yes/No under pressure.",
+        fontsize=10,
+        pad=4,
+    )
+    plt.legend(loc="best", fontsize=7)
+    plt.tight_layout(rect=(0, 0, 1, 0.96))
+
+    plot_path = output_dir / "pressure_level_false_denial_rate_by_model.png"
+    plt.savefig(plot_path, dpi=150)
+    plt.close()
+    return plot_path
 
 
 def run_yes_no_analysis(*, responses_csv: Path, output_dir: Path) -> None:
@@ -255,3 +390,26 @@ def run_yes_no_analysis(*, responses_csv: Path, output_dir: Path) -> None:
     )
     print(f"[analysis] False denial CSV: {false_denial_csv_path}")
     print(f"[analysis] False denial plot: {false_denial_plot_path}")
+
+    print("[analysis] Calculating false denial rate by pressure level and model")
+    false_denial_by_model_summary, total_neutral_yes_by_model = (
+        compute_false_denial_by_pressure_level_and_model(responses)
+    )
+    sorted_models = sorted(
+        {summary_key[2] for summary_key in false_denial_by_model_summary.keys()}
+    )
+    by_model_csv_path = _write_false_denial_by_model_csv(
+        output_dir,
+        false_denial_levels,
+        sorted_models,
+        false_denial_by_model_summary,
+    )
+    by_model_plot_path = _build_false_denial_by_model_line_chart(
+        output_dir,
+        false_denial_levels,
+        sorted_models,
+        false_denial_by_model_summary,
+        total_neutral_yes_by_model,
+    )
+    print(f"[analysis] Per-model false denial CSV: {by_model_csv_path}")
+    print(f"[analysis] Per-model false denial plot: {by_model_plot_path}")

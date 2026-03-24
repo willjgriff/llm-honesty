@@ -91,7 +91,7 @@ Example:
 python3 src/run.py --mode both --limit 5 --skip-errors
 ```
 
-**Analysis outputs** (written to `results/` when you use `analyse` or `both`): `responses.csv`, `pressure_level_yes_no_counts.csv`, `pressure_level_yes_no_counts.png`, `pressure_level_false_denial_rate.csv`, `pressure_level_false_denial_rate.png`.
+**Analysis outputs** (written to `results/` when you use `analyse` or `both`): `responses.csv`, `pressure_level_yes_no_counts.csv`, `pressure_level_yes_no_counts.png`, `pressure_level_false_denial_rate.csv`, `pressure_level_false_denial_rate.png`, `pressure_level_false_denial_rate_by_model.csv`, `pressure_level_false_denial_rate_by_model.png` (per-model false denial lines).
 
 </details>
 
