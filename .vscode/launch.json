@@ -4,12 +4,19 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-    
         {
-            "name": "Python Debugger: Current File",
+            "name": "Query Models",
             "type": "debugpy",
             "request": "launch",
-            "program": "${file}",
+            "program": "${workspaceFolder}/src/run.py",
+            "console": "integratedTerminal",
+            "args": ["--mode", "query"]
+        },
+        {
+            "name": "Run Analysis",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/run.py",
             "console": "integratedTerminal",
             "args": ["--mode", "analyse"]
         }

@@ -17,7 +17,8 @@ At this stage, it is a **minimal proof of concept**. The current prompt set is m
 2. Loads pressure levels from `data/pressure_levels.csv`.
 3. Substitutes `{ORG_NAME}` in pressure prompts with the row's `organisation`.
 4. Calls each configured model for every `(question x pressure_level)` pair.
-5. Writes outputs to `results/responses.csv` with empty label columns for annotation.
+5. Writes raw outputs to `results/responses.csv`.
+6. Analyses response patterns by pressure level and writes summary CSVs/graphs to `results/`.
 
 The goal is to analyze honesty-related behavior under pressure (e.g. incorrect answers, overconfidence, fabrication).
 
@@ -25,7 +26,6 @@ The goal is to analyze honesty-related behavior under pressure (e.g. incorrect a
 
 Potential extensions include:
 - Increasing dataset breadth (more No-ground-truth and open-ended prompts)
-- Adding automated scoring and graph generation directly in the pipeline
 - Testing models for ideological bias
 - Testing jailbreak susceptibility
 - Testing in-context emergent misalignment
@@ -64,10 +64,22 @@ Default models:
 From the repo root:
 
 ```bash
-python3 src/run.py
+python3 src/run.py --mode query
 ```
 
 This overwrites `results/responses.csv` by default.
+
+Run analysis only (uses `results/responses.csv`):
+
+```bash
+python3 src/run.py --mode analyse
+```
+
+Run querying + analysis in one command:
+
+```bash
+python3 src/run.py --mode both
+```
 
 ---
 
@@ -75,6 +87,7 @@ This overwrites `results/responses.csv` by default.
 
 | Flag | Purpose |
 |------|--------|
+| `--mode {query,analyse,both}` | Run querying only, analysis only, or both |
 | `--prompts PATH` | Prompts CSV path (default: `data/prompts.csv`) |
 | `--pressure-levels PATH` | Pressure levels CSV path (default: `data/pressure_levels.csv`) |
 | `--output PATH` | Output CSV path (default: `results/responses.csv`) |
@@ -86,7 +99,7 @@ This overwrites `results/responses.csv` by default.
 Example:
 
 ```bash
-python3 src/run.py --limit 5 --skip-errors
+python3 src/run.py --mode both --limit 5 --skip-errors
 ```
 
 ---
@@ -118,28 +131,17 @@ Columns:
 - `question`
 - `ground_truth`
 - `response`
-- `label_correctness`
-- `label_uncertainty`
-- `label_fabrication`
-- `label_overconfidence`
 
----
+### Analysis outputs in `results/`
 
-## Project files
+After `--mode analyse` or `--mode both`, the pipeline writes:
 
-```text
-data/prompts.csv
-data/pressure_levels.csv
-results/responses.csv
-src/run.py
-src/query_models.py
-src/prompts.py
-src/models.py
-```
-
----
-
-## Notes
-
-- Run from the repository root so relative paths resolve correctly.
-- Use `python3` if `python` is unavailable on your system.
+- `pressure_level_false_denial_rate.csv`: rate summary by pressure level, including:
+  - `false_denial_rate_percent`
+  - `other_rate_percent`
+  - both calculated over cases where the neutral response was `Yes`
+- `pressure_level_false_denial_rate.png`: line chart with:
+  - **False denial rate** = percentage of true facts denied under pressure
+  - **Other/refusal rate** = percentage of non-`Yes`/`No` responses under pressure
+- `pressure_level_yes_no_counts.csv`: Yes/No/Other counts per pressure level
+- `pressure_level_yes_no_counts.png`: grouped bar chart of those counts

@@ -3,6 +3,7 @@
 .cursor/
 __pycache__/
 .pytest_cache/
+.matplotlib/
 ### macOS
 # Finder metadata
 .DS_Store
