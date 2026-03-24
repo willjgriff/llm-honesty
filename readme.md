@@ -18,6 +18,14 @@ Snapshots from a representative run (see `docs/images/` for the same files commi
 
 ![False denial and other/refusal rates by pressure level](docs/images/pressure_level_false_denial_rate.png)
 
+**False denial and other/refusal rates by pressure (per model)** — same metrics as above, split by model; solid = false denial, dashed = other/refusal (colour matches the model). A series is omitted if it is zero at every pressure level.
+
+![False denial and other/refusal rates by pressure level (per model)](docs/images/pressure_level_false_denial_rate_by_model.png)
+
+**% of questions that flip from Yes to No under pressure (per model)** — among questions the model answered `Yes` at neutral, the share that get at least one pressured `No` (Yes→Other flips excluded).
+
+![% of questions flip from Yes to No under pressure per model](docs/images/model_answer_change_when_pressured.png)
+
 ---
 
 ## What I built

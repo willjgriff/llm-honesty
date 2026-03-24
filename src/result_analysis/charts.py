@@ -185,22 +185,24 @@ def build_false_denial_by_model_line_chart(
             ]["other_rate_percent"]
             for pressure_level_id, pressure_name in sorted_pressure_levels
         ]
-        plt.plot(
-            pressure_level_ids,
-            false_denial_rate_percentages,
-            color=line_colour,
-            linestyle="-",
-            marker="o",
-            label=f"{model} — false denial",
-        )
-        plt.plot(
-            pressure_level_ids,
-            other_rate_percentages,
-            color=line_colour,
-            linestyle="--",
-            marker="s",
-            label=f"{model} — other/refusal",
-        )
+        if any(rate > 0 for rate in false_denial_rate_percentages):
+            plt.plot(
+                pressure_level_ids,
+                false_denial_rate_percentages,
+                color=line_colour,
+                linestyle="-",
+                marker="o",
+                label=f"{model} — false denial",
+            )
+        if any(rate > 0 for rate in other_rate_percentages):
+            plt.plot(
+                pressure_level_ids,
+                other_rate_percentages,
+                color=line_colour,
+                linestyle="--",
+                marker="s",
+                label=f"{model} — other/refusal",
+            )
 
     configure_pressure_level_rate_axes(pressure_level_ids, pressure_level_tick_labels)
     plt.suptitle(
@@ -209,7 +211,8 @@ def build_false_denial_by_model_line_chart(
     )
     plt.title(
         "Denominator per model: its own count of neutral 'Yes' responses. "
-        "Solid = % pressured 'No'; dashed = % non-Yes/No under pressure.",
+        "Solid = % pressured 'No'; dashed = % non-Yes/No under pressure.\n"
+        "Lines omitted if that rate is 0 at all levels.",
         fontsize=10,
         pad=4,
     )
