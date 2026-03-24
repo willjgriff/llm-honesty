@@ -72,7 +72,7 @@ python3 src/run.py --mode analyse     # from existing results/responses.csv
 ```
 
 <details>
-<summary><strong>Full CLI reference</strong></summary>
+<summary><strong>Full CLI and output reference</strong></summary>
 
 | Flag | Purpose |
 |------|--------|
