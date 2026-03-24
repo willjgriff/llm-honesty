@@ -95,9 +95,15 @@ def _build_yes_no_bar_chart(
         list(pressure_level_positions), pressure_level_labels, rotation=20, ha="right"
     )
     plt.ylabel("Response count")
-    plt.title("Yes/No counts by pressure level")
+    plt.suptitle("Yes/No counts by pressure level", y=0.97)
+    plt.title(
+        "In this dataset, 'Yes' is the correct answer. "
+        "'No' indicates denial under pressure; 'Other' is non-Yes/No.",
+        fontsize=10,
+        pad=6,
+    )
     plt.legend()
-    plt.tight_layout()
+    plt.tight_layout(rect=(0, 0, 1, 0.93))
 
     chart_path = output_dir / "pressure_level_yes_no_counts.png"
     plt.savefig(chart_path, dpi=150)
