@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 from scorer import (
     compute_false_denial_by_pressure_level,
     compute_false_denial_by_pressure_level_and_model,
+    compute_yes_to_no_flip_rate_when_pressured_by_model,
     count_yes_no_by_pressure_level,
     read_responses,
 )
@@ -347,6 +348,76 @@ def _build_false_denial_by_model_line_chart(
     return plot_path
 
 
+def _write_model_yes_to_no_flip_csv(
+    output_dir: Path,
+    sorted_models: list[str],
+    flip_summary_by_model: dict[str, dict[str, float]],
+) -> Path:
+    csv_path = output_dir / "model_answer_change_when_pressured.csv"
+    print(f"[analysis] Writing model Yes→No flip CSV: {csv_path}")
+    with csv_path.open("w", newline="", encoding="utf-8") as csv_file:
+        writer = csv.DictWriter(
+            csv_file,
+            fieldnames=[
+                "model",
+                "yes_to_no_flip_question_count",
+                "neutral_yes_question_count",
+                "yes_to_no_flip_rate_percent",
+            ],
+        )
+        writer.writeheader()
+        for model in sorted_models:
+            row = flip_summary_by_model[model]
+            writer.writerow(
+                {
+                    "model": model,
+                    "yes_to_no_flip_question_count": int(
+                        row["yes_to_no_flip_question_count"]
+                    ),
+                    "neutral_yes_question_count": int(row["neutral_yes_question_count"]),
+                    "yes_to_no_flip_rate_percent": round(
+                        row["yes_to_no_flip_rate_percent"], 4
+                    ),
+                }
+            )
+    return csv_path
+
+
+def _build_model_yes_to_no_flip_bar_chart(
+    output_dir: Path,
+    sorted_models: list[str],
+    flip_summary_by_model: dict[str, dict[str, float]],
+) -> Path:
+    print("[analysis] Building model Yes→No flip bar chart")
+    flip_rate_percentages = [
+        flip_summary_by_model[model]["yes_to_no_flip_rate_percent"]
+        for model in sorted_models
+    ]
+    model_positions = range(len(sorted_models))
+
+    figure, axes = plt.subplots(figsize=(10, 4.8))
+    axes.bar(list(model_positions), flip_rate_percentages, color="steelblue")
+    axes.set_xticks(list(model_positions))
+    axes.set_xticklabels(sorted_models, rotation=25, ha="right")
+    axes.set_ylabel(
+        "% of questions",
+        fontsize=10,
+    )
+    axes.set_xlabel("Model")
+    axes.set_title(
+        "% of questions flip from\n yes to no under pressure per model",
+        fontsize=10,
+        pad=4,
+    )
+    axes.set_ylim(bottom=0)
+    figure.tight_layout(rect=(0.06, 0.06, 0.98, 0.88))
+
+    plot_path = output_dir / "model_answer_change_when_pressured.png"
+    figure.savefig(plot_path, dpi=150, bbox_inches="tight", pad_inches=0.15)
+    plt.close(figure)
+    return plot_path
+
+
 def run_yes_no_analysis(*, responses_csv: Path, output_dir: Path) -> None:
     """
     Count Yes/No/Other by pressure level and save:
@@ -413,3 +484,23 @@ def run_yes_no_analysis(*, responses_csv: Path, output_dir: Path) -> None:
     )
     print(f"[analysis] Per-model false denial CSV: {by_model_csv_path}")
     print(f"[analysis] Per-model false denial plot: {by_model_plot_path}")
+
+    print("[analysis] Calculating Yes→No flip rate when pressured (by model)")
+    flip_summary_by_model = compute_yes_to_no_flip_rate_when_pressured_by_model(
+        responses
+    )
+    sorted_models_for_flip = sorted(flip_summary_by_model.keys())
+    if sorted_models_for_flip:
+        flip_csv_path = _write_model_yes_to_no_flip_csv(
+            output_dir, sorted_models_for_flip, flip_summary_by_model
+        )
+        flip_plot_path = _build_model_yes_to_no_flip_bar_chart(
+            output_dir, sorted_models_for_flip, flip_summary_by_model
+        )
+        print(f"[analysis] Model Yes→No flip CSV: {flip_csv_path}")
+        print(f"[analysis] Model Yes→No flip plot: {flip_plot_path}")
+    else:
+        print(
+            "[analysis] Skipping model Yes→No flip chart (no questions with neutral "
+            "'Yes' in the data)."
+        )

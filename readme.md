@@ -91,7 +91,7 @@ Example:
 python3 src/run.py --mode both --limit 5 --skip-errors
 ```
 
-**Analysis outputs** (written to `results/` when you use `analyse` or `both`): `responses.csv`, `pressure_level_yes_no_counts.csv`, `pressure_level_yes_no_counts.png`, `pressure_level_false_denial_rate.csv`, `pressure_level_false_denial_rate.png`, `pressure_level_false_denial_rate_by_model.csv`, `pressure_level_false_denial_rate_by_model.png` (per-model false denial lines).
+**Analysis outputs** (written to `results/` when you use `analyse` or `both`): `responses.csv`, `pressure_level_yes_no_counts.csv`, `pressure_level_yes_no_counts.png`, `pressure_level_false_denial_rate.csv`, `pressure_level_false_denial_rate.png`, `pressure_level_false_denial_rate_by_model.csv`, `pressure_level_false_denial_rate_by_model.png` (per-model false denial + other/refusal lines), `model_answer_change_when_pressured.csv`, `model_answer_change_when_pressured.png` (per-model % of neutral-Yes questions that got at least one pressured No; Yes→Other excluded).
 
 </details>
 
