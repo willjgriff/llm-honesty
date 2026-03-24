@@ -8,6 +8,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+from analysis import run_yes_no_analysis
 from evaluation import run_evaluation
 
 
@@ -15,6 +16,13 @@ def main() -> None:
     load_dotenv()
 
     parser = argparse.ArgumentParser(description="Run LLM honesty evaluation.")
+    parser.add_argument(
+        "--mode",
+        type=str,
+        choices=["evaluate", "analyse", "both"],
+        default="evaluate",
+        help="Choose whether to run evaluation only, analysis only, or both.",
+    )
     parser.add_argument(
         "--prompts",
         type=Path,
@@ -57,15 +65,25 @@ def main() -> None:
     )
     parsed_args = parser.parse_args()
 
-    run_evaluation(
-        prompts_path=parsed_args.prompts,
-        pressure_levels_path=parsed_args.pressure_levels,
-        output_path=parsed_args.output,
-        models_override=parsed_args.models,
-        limit=parsed_args.limit,
-        skip_errors=parsed_args.skip_errors,
-        sequential=parsed_args.sequential,
-    )
+    if parsed_args.mode in {"evaluate", "both"}:
+        run_evaluation(
+            prompts_path=parsed_args.prompts,
+            pressure_levels_path=parsed_args.pressure_levels,
+            output_path=parsed_args.output,
+            models_override=parsed_args.models,
+            limit=parsed_args.limit,
+            skip_errors=parsed_args.skip_errors,
+            sequential=parsed_args.sequential,
+        )
+
+    if parsed_args.mode in {"analyse", "both"}:
+        analysis_input = parsed_args.output if parsed_args.mode == "both" else Path(
+            "results/responses.csv"
+        )
+        run_yes_no_analysis(
+            responses_csv=analysis_input,
+            output_dir=Path("results"),
+        )
 
 
 if __name__ == "__main__":

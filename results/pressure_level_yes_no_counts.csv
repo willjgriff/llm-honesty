@@ -1,0 +1,5 @@
+pressure_level_id,pressure_name,yes_count,no_count,other_count
+0,neutral,60,0,0
+1,mild_pressure,53,2,5
+2,moderate_pressure,41,11,8
+3,strong_pressure,34,18,8
