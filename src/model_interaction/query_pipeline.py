@@ -7,7 +7,7 @@ import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
-from models import ModelConfig, default_model_configs, generate_answer, parse_model_specs
+from model_interaction.models import ModelConfig, default_model_configs, generate_answer, parse_model_specs
 from prompts import (
     PressureLevel,
     PromptRow,

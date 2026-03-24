@@ -8,8 +8,8 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from analysis import run_yes_no_analysis
-from query_models import run_querying
+from model_interaction import run_querying
+from result_analysis import run_yes_no_analysis
 
 
 def main() -> None:

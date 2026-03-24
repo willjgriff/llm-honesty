@@ -38,6 +38,13 @@ Snapshots from a representative run (see `docs/images/` for the same files commi
 3. Write all rows to `results/responses.csv`.
 4. Optional analysis writes `pressure_level_yes_no_counts.*` and `pressure_level_false_denial_rate.*` into `results/`.
 
+### Source layout (`src/`)
+
+- `run.py` — CLI entrypoint.
+- `prompts.py` — load questions and pressure-level templates.
+- `model_interaction/` — OpenRouter/OpenAI clients, parallel querying, `responses.csv` writer.
+- `result_analysis/` — scoring (`scoring/`), summary CSV writers (`csv_writes.py`), charts (`charts.py`), orchestration (`pipeline.py`).
+
 First three prompts in the dataset (IDs match `data/prompts.csv`):
 
 ```csv
