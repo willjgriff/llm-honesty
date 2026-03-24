@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Query Models",
+            "name": "Query And Analyse",
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/src/run.py",
