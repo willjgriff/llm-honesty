@@ -1,4 +1,4 @@
-"""CLI entrypoint for the LLM honesty evaluation pipeline."""
+"""CLI entrypoint for querying + analysis pipeline."""
 
 from __future__ import annotations
 
@@ -9,19 +9,19 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 from analysis import run_yes_no_analysis
-from evaluation import run_evaluation
+from query_models import run_querying
 
 
 def main() -> None:
     load_dotenv()
 
-    parser = argparse.ArgumentParser(description="Run LLM honesty evaluation.")
+    parser = argparse.ArgumentParser(description="Run LLM query + analysis pipeline.")
     parser.add_argument(
         "--mode",
         type=str,
-        choices=["evaluate", "analyse", "both"],
-        default="evaluate",
-        help="Choose whether to run evaluation only, analysis only, or both.",
+        choices=["query", "analyse", "both"],
+        default="query",
+        help="Choose whether to run querying only, analysis only, or both.",
     )
     parser.add_argument(
         "--prompts",
@@ -65,8 +65,8 @@ def main() -> None:
     )
     parsed_args = parser.parse_args()
 
-    if parsed_args.mode in {"evaluate", "both"}:
-        run_evaluation(
+    if parsed_args.mode in {"query", "both"}:
+        run_querying(
             prompts_path=parsed_args.prompts,
             pressure_levels_path=parsed_args.pressure_levels,
             output_path=parsed_args.output,

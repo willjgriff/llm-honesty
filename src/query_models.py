@@ -1,4 +1,4 @@
-"""Core evaluation pipeline: pressure levels, parallel orchestration, responses CSV."""
+"""Core query pipeline: pressure levels, parallel orchestration, responses CSV."""
 
 from __future__ import annotations
 
@@ -49,7 +49,7 @@ def write_responses_csv(
             )
 
 
-def evaluate_single_model(
+def query_single_model(
     *,
     model_config: ModelConfig,
     prompts: list[PromptRow],
@@ -115,7 +115,7 @@ def evaluate_single_model(
     return rows
 
 
-def run_evaluation(
+def run_querying(
     *,
     prompts_path: Path,
     pressure_levels_path: Path,
@@ -126,7 +126,7 @@ def run_evaluation(
     sequential: bool,
 ) -> None:
     """
-    Load prompts and pressure levels, run all configured models, write CSV.
+    Load prompts and pressure levels, query all configured models, write CSV.
     """
     prompts = load_prompts(prompts_path)
     if limit > 0:
@@ -140,7 +140,7 @@ def run_evaluation(
     total_per_model = len(prompts) * len(pressure_levels)
     total_expected = total_per_model * len(model_configs)
     print(
-        "Starting evaluation: "
+        "Starting query run: "
         f"{len(prompts)} prompts x {len(pressure_levels)} pressure levels x "
         f"{len(model_configs)} models = {total_expected} API calls"
     )
@@ -157,7 +157,7 @@ def run_evaluation(
     if sequential:
         for model_index, model_config in enumerate(model_configs, start=1):
             output_rows.extend(
-                evaluate_single_model(
+                query_single_model(
                     model_config=model_config,
                     prompts=prompts,
                     pressure_levels=pressure_levels,
@@ -174,7 +174,7 @@ def run_evaluation(
             for model_index, model_config in enumerate(model_configs, start=1):
                 submitted_futures.append(
                     executor.submit(
-                        evaluate_single_model,
+                        query_single_model,
                         model_config=model_config,
                         prompts=prompts,
                         pressure_levels=pressure_levels,

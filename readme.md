@@ -1,4 +1,4 @@
-# LLM honesty evaluation (pressure levels)
+# LLM honesty querying (pressure levels)
 
 This project evaluates how model answers change when the **same question** is asked under different **pressure-level system prompts**.
 
@@ -64,7 +64,7 @@ Default models:
 From the repo root:
 
 ```bash
-python3 src/run_eval.py
+python3 src/run.py
 ```
 
 This overwrites `results/responses.csv` by default.
@@ -86,7 +86,7 @@ This overwrites `results/responses.csv` by default.
 Example:
 
 ```bash
-python3 src/run_eval.py --limit 5 --skip-errors
+python3 src/run.py --limit 5 --skip-errors
 ```
 
 ---
@@ -131,8 +131,8 @@ Columns:
 data/prompts.csv
 data/pressure_levels.csv
 results/responses.csv
-src/run_eval.py
-src/evaluation.py
+src/run.py
+src/query_models.py
 src/prompts.py
 src/models.py
 ```
