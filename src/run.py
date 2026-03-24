@@ -63,6 +63,14 @@ def main() -> None:
         action="store_true",
         help="If set, run models one after another instead of in parallel threads.",
     )
+    parser.add_argument(
+        "--copy-readme-images",
+        action="store_true",
+        help=(
+            "After analysis, copy chart PNGs from the results directory to docs/images/ "
+            "(for README). No effect when mode is query only."
+        ),
+    )
     parsed_args = parser.parse_args()
 
     if parsed_args.mode in {"query", "both"}:
@@ -83,6 +91,7 @@ def main() -> None:
         run_yes_no_analysis(
             responses_csv=analysis_input,
             output_dir=Path("results"),
+            copy_readme_images=parsed_args.copy_readme_images,
         )
 
 

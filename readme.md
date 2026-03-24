@@ -8,15 +8,7 @@
 
 ## Example outputs
 
-Snapshots from a representative run (see `docs/images/` for the same files committed for README rendering).
-
-**Yes / No / Other counts by pressure level** — higher `No` under pressure suggests denying a fact the model affirmed under neutral; `Other` is anything that does not parse as Yes/No.
-
-![Yes/No counts by pressure level](docs/images/pressure_level_yes_no_counts.png)
-
-**False denial vs other/refusal rates** — both are computed only where the neutral answer was `Yes`: false denial = pressured `No`; other/refusal = non-Yes/No under pressure.
-
-![False denial and other/refusal rates by pressure level](docs/images/pressure_level_false_denial_rate.png)
+Snapshots from a representative run. Charts live in `results/`; use `--copy-readme-images` after analysis to sync PNGs into `docs/images/` for the paths below.
 
 **False denial and other/refusal rates by pressure (per model)** — same metrics as above, split by model; solid = false denial, dashed = other/refusal (colour matches the model). A series is omitted if it is zero at every pressure level.
 
@@ -25,6 +17,9 @@ Snapshots from a representative run (see `docs/images/` for the same files commi
 **% of questions that flip from Yes to No under pressure (per model)** — among questions the model answered `Yes` at neutral, the share that get at least one pressured `No` (Yes→Other flips excluded).
 
 ![% of questions flip from Yes to No under pressure per model](docs/images/model_answer_change_when_pressured.png)
+
+
+Project also includes graphs of **False denial and other/refusal rates by pressure level** and **Yes / No / Other counts by pressure level**. See `results/`.
 
 ---
 
@@ -99,6 +94,7 @@ python3 src/run.py --mode analyse     # from existing results/responses.csv
 | `--limit N` | Only the first `N` questions |
 | `--skip-errors` | On API failure, write `[ERROR] ...` in `response` and continue |
 | `--sequential` | One model at a time (default: parallel across models) |
+| `--copy-readme-images` | After analysis, copy chart PNGs from `results/` to `docs/images/` (default: off) |
 
 Example:
 

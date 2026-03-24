@@ -10,6 +10,14 @@
             "request": "launch",
             "program": "${workspaceFolder}/src/run.py",
             "console": "integratedTerminal",
+            "args": ["--mode", "both", "--copy-readme-images"]
+        },
+        {
+            "name": "Query Models",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/run.py",
+            "console": "integratedTerminal",
             "args": ["--mode", "query"]
         },
         {
@@ -18,7 +26,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/src/run.py",
             "console": "integratedTerminal",
-            "args": ["--mode", "analyse"]
+            "args": ["--mode", "analyse", "--copy-readme-images"]
         }
     ]
 }

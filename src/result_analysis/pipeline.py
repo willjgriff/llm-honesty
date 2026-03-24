@@ -2,7 +2,16 @@
 
 from __future__ import annotations
 
+import shutil
 from pathlib import Path
+
+# Chart files produced by this pipeline (for optional copy to docs/images/).
+_README_CHART_FILENAMES = (
+    "pressure_level_yes_no_counts.png",
+    "pressure_level_false_denial_rate.png",
+    "pressure_level_false_denial_rate_by_model.png",
+    "model_answer_change_when_pressured.png",
+)
 
 from result_analysis.charts import (
     build_false_denial_by_model_line_chart,
@@ -25,11 +34,29 @@ from result_analysis.scoring import (
 )
 
 
-def run_yes_no_analysis(*, responses_csv: Path, output_dir: Path) -> None:
+def _copy_charts_to_docs_images(*, output_dir: Path, docs_images_dir: Path) -> None:
+    docs_images_dir.mkdir(parents=True, exist_ok=True)
+    for chart_filename in _README_CHART_FILENAMES:
+        source_path = output_dir / chart_filename
+        if not source_path.is_file():
+            continue
+        destination_path = docs_images_dir / chart_filename
+        shutil.copy2(source_path, destination_path)
+        print(f"[analysis] Copied chart for README: {source_path} -> {destination_path}")
+
+
+def run_yes_no_analysis(
+    *,
+    responses_csv: Path,
+    output_dir: Path,
+    copy_readme_images: bool = False,
+    docs_images_dir: Path | None = None,
+) -> None:
     """
-    Count Yes/No/Other by pressure level and save:
-    - results/pressure_level_yes_no_counts.csv
-    - results/pressure_level_yes_no_counts.png
+    Score responses, write summary CSVs and charts under output_dir.
+
+    If copy_readme_images is True, copy known chart PNGs to docs_images_dir
+    (default: docs/images) for README embedding.
     """
     print(f"[analysis] Reading responses from: {responses_csv}")
     responses = read_responses(responses_csv)
@@ -111,3 +138,10 @@ def run_yes_no_analysis(*, responses_csv: Path, output_dir: Path) -> None:
             "[analysis] Skipping model Yes→No flip chart (no questions with neutral "
             "'Yes' in the data)."
         )
+
+    if copy_readme_images:
+        readme_docs_dir = docs_images_dir if docs_images_dir is not None else Path(
+            "docs/images"
+        )
+        print(f"[analysis] Copying charts to {readme_docs_dir} for README embedding")
+        _copy_charts_to_docs_images(output_dir=output_dir, docs_images_dir=readme_docs_dir)
