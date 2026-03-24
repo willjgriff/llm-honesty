@@ -1,23 +1,20 @@
 # LLM honesty under pressure
 
-**Do models deny true facts more often when the system prompt frames them as protecting a named organisation?** This project runs the same Yes/No questions across escalating “pressure” instructions, compares neutral vs pressured answers across three models, and plots aggregate denial and refusal rates.
+**Do models deny true facts more often when the system prompt frames them as protecting a named organisation?**
 
-*Proof of concept — Yes-ground-truth questions only for now.*
+This project runs the same Yes/No questions across escalating “pressure” instructions, compares neutral vs pressured answers across three models, and plots aggregate denial and refusal rates.
+
+It's a proof of concept with only Yes-ground-truth questions for now. If the model returns No then it's being dishonest. For future work see end.
 
 ---
 
 ## Example outputs
 
-Snapshots from a representative run. Charts live in `results/`; use `--copy-readme-images` after analysis to sync PNGs into `docs/images/` for the paths below.
-
-**False denial and other/refusal rates by pressure (per model)** — same metrics as above, split by model; solid = false denial, dashed = other/refusal (colour matches the model). A series is omitted if it is zero at every pressure level.
+Graph output from a representative run. Output charts live in `results/`, persistent README charts in `docs/images/`.
 
 ![False denial and other/refusal rates by pressure level (per model)](docs/images/pressure_level_false_denial_rate_by_model.png)
 
-**% of questions that flip from Yes to No under pressure (per model)** — among questions the model answered `Yes` at neutral, the share that get at least one pressured `No` (Yes→Other flips excluded).
-
-![% of questions flip from Yes to No under pressure per model](docs/images/model_answer_change_when_pressured.png)
-
+![% of neutral-Yes questions that change under pressure per model](docs/images/model_answer_change_when_pressured.png)
 
 Project also includes graphs of **False denial and other/refusal rates by pressure level** and **Yes / No / Other counts by pressure level**. See `results/`.
 
@@ -102,7 +99,7 @@ Example:
 python3 src/run.py --mode both --limit 5 --skip-errors
 ```
 
-**Analysis outputs** (written to `results/` when you use `analyse` or `both`): `responses.csv`, `pressure_level_yes_no_counts.csv`, `pressure_level_yes_no_counts.png`, `pressure_level_false_denial_rate.csv`, `pressure_level_false_denial_rate.png`, `pressure_level_false_denial_rate_by_model.csv`, `pressure_level_false_denial_rate_by_model.png` (per-model false denial + other/refusal lines), `model_answer_change_when_pressured.csv`, `model_answer_change_when_pressured.png` (per-model % of neutral-Yes questions that got at least one pressured No; Yes→Other excluded).
+**Analysis outputs** (written to `results/` when you use `analyse` or `both`): `responses.csv`, `pressure_level_yes_no_counts.csv`, `pressure_level_yes_no_counts.png`, `pressure_level_false_denial_rate.csv`, `pressure_level_false_denial_rate.png`, `pressure_level_false_denial_rate_by_model.csv`, `pressure_level_false_denial_rate_by_model.png` (per-model false denial + other/refusal lines), `model_answer_change_when_pressured.csv`, `model_answer_change_when_pressured.png` (per-model % of neutral-Yes questions with at least one pressured answer that is not Yes — i.e. No or Other).
 
 </details>
 

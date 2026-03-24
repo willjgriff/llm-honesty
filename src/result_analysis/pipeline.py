@@ -16,19 +16,19 @@ _README_CHART_FILENAMES = (
 from result_analysis.charts import (
     build_false_denial_by_model_line_chart,
     build_false_denial_line_chart,
-    build_model_yes_to_no_flip_bar_chart,
+    build_model_neutral_yes_change_bar_chart,
     build_yes_no_bar_chart,
 )
 from result_analysis.csv_writes import (
     write_false_denial_by_model_csv,
     write_false_denial_csv,
-    write_model_yes_to_no_flip_csv,
+    write_model_neutral_yes_change_csv,
     write_yes_no_counts_csv,
 )
 from result_analysis.scoring import (
     compute_false_denial_by_pressure_level,
     compute_false_denial_by_pressure_level_and_model,
-    compute_yes_to_no_flip_rate_when_pressured_by_model,
+    compute_neutral_yes_changed_when_pressured_by_model,
     count_yes_no_by_pressure_level,
     read_responses,
 )
@@ -119,24 +119,26 @@ def run_yes_no_analysis(
     print(f"[analysis] Per-model false denial CSV: {by_model_csv_path}")
     print(f"[analysis] Per-model false denial plot: {by_model_plot_path}")
 
-    print("[analysis] Calculating Yes→No flip rate when pressured (by model)")
-    flip_summary_by_model = compute_yes_to_no_flip_rate_when_pressured_by_model(
+    print(
+        "[analysis] Calculating neutral-Yes change rate when pressured (by model)"
+    )
+    change_summary_by_model = compute_neutral_yes_changed_when_pressured_by_model(
         responses
     )
-    sorted_models_for_flip = sorted(flip_summary_by_model.keys())
-    if sorted_models_for_flip:
-        flip_csv_path = write_model_yes_to_no_flip_csv(
-            output_dir, sorted_models_for_flip, flip_summary_by_model
+    sorted_models_for_change = sorted(change_summary_by_model.keys())
+    if sorted_models_for_change:
+        change_csv_path = write_model_neutral_yes_change_csv(
+            output_dir, sorted_models_for_change, change_summary_by_model
         )
-        flip_plot_path = build_model_yes_to_no_flip_bar_chart(
-            output_dir, sorted_models_for_flip, flip_summary_by_model
+        change_plot_path = build_model_neutral_yes_change_bar_chart(
+            output_dir, sorted_models_for_change, change_summary_by_model
         )
-        print(f"[analysis] Model Yes→No flip CSV: {flip_csv_path}")
-        print(f"[analysis] Model Yes→No flip plot: {flip_plot_path}")
+        print(f"[analysis] Model neutral-Yes change CSV: {change_csv_path}")
+        print(f"[analysis] Model neutral-Yes change plot: {change_plot_path}")
     else:
         print(
-            "[analysis] Skipping model Yes→No flip chart (no questions with neutral "
-            "'Yes' in the data)."
+            "[analysis] Skipping model neutral-Yes change chart (no questions with "
+            "neutral 'Yes' in the data)."
         )
 
     if copy_readme_images:

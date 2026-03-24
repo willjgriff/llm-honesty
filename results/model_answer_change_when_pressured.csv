@@ -1,4 +1,4 @@
-model,yes_to_no_flip_question_count,neutral_yes_question_count,yes_to_no_flip_rate_percent
+model,neutral_yes_changed_question_count,neutral_yes_question_count,neutral_yes_changed_rate_percent
 openai:gpt-4.1-mini,11,20,55.0
-openrouter:anthropic/claude-3.5-haiku,3,20,15.0
+openrouter:anthropic/claude-3.5-haiku,11,20,55.0
 openrouter:meta-llama/llama-3.3-70b-instruct,9,20,45.0

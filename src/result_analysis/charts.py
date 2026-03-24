@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 def false_denial_aggregate_chart_caption() -> str:
     return (
         "Rates are calculated over cases where the neutral response was 'Yes'.\n"
-        "False denial rate = % of true facts denied under pressure. "
+        "False denial rate = % of true facts denied under pressure."
         "Other/refusal rate = % answered with non-Yes/No when under pressure."
     )
 
@@ -210,8 +210,8 @@ def build_false_denial_by_model_line_chart(
         y=0.965,
     )
     plt.title(
-        "Denominator per model: its own count of neutral 'Yes' responses. "
-        "Solid = % pressured 'No'; dashed = % non-Yes/No under pressure.\n"
+        "Percent (%) of true facts denied or refused under pressure."
+        "Solid = pressured and said 'No'. Dashed = refusal/other response under pressure.\n"
         "Lines omitted if that rate is 0 at all levels.",
         fontsize=10,
         pad=4,
@@ -225,20 +225,20 @@ def build_false_denial_by_model_line_chart(
     return plot_path
 
 
-def build_model_yes_to_no_flip_bar_chart(
+def build_model_neutral_yes_change_bar_chart(
     output_dir: Path,
     sorted_models: list[str],
-    flip_summary_by_model: dict[str, dict[str, float]],
+    change_summary_by_model: dict[str, dict[str, float]],
 ) -> Path:
-    print("[analysis] Building model Yes→No flip bar chart")
-    flip_rate_percentages = [
-        flip_summary_by_model[model]["yes_to_no_flip_rate_percent"]
+    print("[analysis] Building model neutral-Yes change bar chart")
+    change_rate_percentages = [
+        change_summary_by_model[model]["neutral_yes_changed_rate_percent"]
         for model in sorted_models
     ]
     model_positions = range(len(sorted_models))
 
     figure, axes = plt.subplots(figsize=(10, 4.8))
-    axes.bar(list(model_positions), flip_rate_percentages, color="steelblue")
+    axes.bar(list(model_positions), change_rate_percentages, color="steelblue")
     axes.set_xticks(list(model_positions))
     axes.set_xticklabels(sorted_models, rotation=25, ha="right")
     axes.set_ylabel(
@@ -247,7 +247,7 @@ def build_model_yes_to_no_flip_bar_chart(
     )
     axes.set_xlabel("Model")
     axes.set_title(
-        "% of questions flip from\n yes to no under pressure per model",
+        "% of neutral-Yes questions that change\n(No or Other) under pressure per model",
         fontsize=10,
         pad=4,
     )

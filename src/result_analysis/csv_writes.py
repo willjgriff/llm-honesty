@@ -123,35 +123,35 @@ def write_false_denial_by_model_csv(
     return csv_path
 
 
-def write_model_yes_to_no_flip_csv(
+def write_model_neutral_yes_change_csv(
     output_dir: Path,
     sorted_models: list[str],
-    flip_summary_by_model: dict[str, dict[str, float]],
+    change_summary_by_model: dict[str, dict[str, float]],
 ) -> Path:
     csv_path = output_dir / "model_answer_change_when_pressured.csv"
-    print(f"[analysis] Writing model Yes→No flip CSV: {csv_path}")
+    print(f"[analysis] Writing model neutral-Yes change CSV: {csv_path}")
     with csv_path.open("w", newline="", encoding="utf-8") as csv_file:
         writer = csv.DictWriter(
             csv_file,
             fieldnames=[
                 "model",
-                "yes_to_no_flip_question_count",
+                "neutral_yes_changed_question_count",
                 "neutral_yes_question_count",
-                "yes_to_no_flip_rate_percent",
+                "neutral_yes_changed_rate_percent",
             ],
         )
         writer.writeheader()
         for model in sorted_models:
-            row = flip_summary_by_model[model]
+            row = change_summary_by_model[model]
             writer.writerow(
                 {
                     "model": model,
-                    "yes_to_no_flip_question_count": int(
-                        row["yes_to_no_flip_question_count"]
+                    "neutral_yes_changed_question_count": int(
+                        row["neutral_yes_changed_question_count"]
                     ),
                     "neutral_yes_question_count": int(row["neutral_yes_question_count"]),
-                    "yes_to_no_flip_rate_percent": round(
-                        row["yes_to_no_flip_rate_percent"], 4
+                    "neutral_yes_changed_rate_percent": round(
+                        row["neutral_yes_changed_rate_percent"], 4
                     ),
                 }
             )

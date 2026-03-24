@@ -1,4 +1,4 @@
-"""False denial and other/refusal rates vs neutral Yes."""
+"""False denial / other vs neutral Yes, and neutral-Yes→non-Yes drift by model."""
 
 from __future__ import annotations
 
@@ -85,6 +85,56 @@ def compute_false_denial_by_pressure_level_and_model(
         total_neutral_yes_by_model,
     )
     return summary, total_neutral_yes_by_model
+
+
+def compute_neutral_yes_changed_when_pressured_by_model(
+    responses: list[dict[str, Any]],
+) -> dict[str, dict[str, float]]:
+    """
+    Per model: among keys with neutral Yes, fraction that have at least one
+    pressured answer that is not Yes (No or Other).
+    """
+    neutral_response_label_by_key, non_neutral_response_records, _ = (
+        split_responses_by_pressure_level(responses)
+    )
+
+    neutral_yes_question_count_by_model: dict[str, int] = defaultdict(int)
+    for response_key, neutral_label in neutral_response_label_by_key.items():
+        if neutral_label == "Yes":
+            neutral_yes_question_count_by_model[response_key[2]] += 1
+
+    keys_with_pressured_non_yes: set[tuple[str, str, str]] = set()
+    for (
+        response_key,
+        _pressure_level_id,
+        _pressure_name,
+        pressured_response_label,
+    ) in non_neutral_response_records:
+        if neutral_response_label_by_key.get(response_key) != "Yes":
+            continue
+        if pressured_response_label == "Yes":
+            continue
+        keys_with_pressured_non_yes.add(response_key)
+
+    changed_count_by_model: dict[str, int] = defaultdict(int)
+    for response_key in keys_with_pressured_non_yes:
+        changed_count_by_model[response_key[2]] += 1
+
+    summary: dict[str, dict[str, float]] = {}
+    for model in sorted(neutral_yes_question_count_by_model.keys()):
+        neutral_yes_questions = neutral_yes_question_count_by_model[model]
+        changed_count = changed_count_by_model[model]
+        rate_percent = (
+            (changed_count / neutral_yes_questions) * 100.0
+            if neutral_yes_questions
+            else 0.0
+        )
+        summary[model] = {
+            "neutral_yes_changed_question_count": float(changed_count),
+            "neutral_yes_question_count": float(neutral_yes_questions),
+            "neutral_yes_changed_rate_percent": rate_percent,
+        }
+    return summary
 
 
 def _count_total_neutral_yes(
