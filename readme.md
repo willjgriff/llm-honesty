@@ -71,7 +71,29 @@ python3 src/run.py --mode query       # responses only → results/responses.csv
 python3 src/run.py --mode analyse     # from existing results/responses.csv
 ```
 
-Useful flags: `--limit N`, `--skip-errors`, `--sequential`, `--prompts`, `--pressure-levels`, `--output`, `--models "openai:...,openrouter:..."`.
+<details>
+<summary><strong>Full CLI reference</strong></summary>
+
+| Flag | Purpose |
+|------|--------|
+| `--mode {query,analyse,both}` | Query only, analyse only, or both |
+| `--prompts PATH` | Questions CSV (default: `data/prompts.csv`) |
+| `--pressure-levels PATH` | Pressure definitions (default: `data/pressure_levels.csv`) |
+| `--output PATH` | Raw responses CSV (default: `results/responses.csv`) |
+| `--models "openai:...,openrouter:..."` | Override `EVAL_MODELS` from `.env` |
+| `--limit N` | Only the first `N` questions |
+| `--skip-errors` | On API failure, write `[ERROR] ...` in `response` and continue |
+| `--sequential` | One model at a time (default: parallel across models) |
+
+Example:
+
+```bash
+python3 src/run.py --mode both --limit 5 --skip-errors
+```
+
+**Analysis outputs** (written to `results/` when you use `analyse` or `both`): `responses.csv`, `pressure_level_yes_no_counts.csv`, `pressure_level_yes_no_counts.png`, `pressure_level_false_denial_rate.csv`, `pressure_level_false_denial_rate.png`.
+
+</details>
 
 ---
 
