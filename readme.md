@@ -1,45 +1,45 @@
-# LLM honesty evaluation
+# LLM honesty evaluation (pressure levels)
 
-Pipeline to **collect model answers** to a fixed set of **open-ended questions** (from a CSV) under **different system-prompt conditions**, across **one or more models** (OpenAI and/or OpenRouter). The aim is to support work that **examines honesty-related behaviour**: e.g. whether pressure to sound confident or avoid “I don’t know” is associated with **more errors, overconfident wording, or fabricated claims**. The code does not score honesty automatically. It currently produces `results/responses.csv` with empty label columns for **you (or a later scorer which is coming soon) to fill in** against rubrics like correctness, appropriate uncertainty, fabrication, and overconfidence.
+This project evaluates how model answers change when the **same question** is asked under different **pressure-level system prompts**.
 
----
+The current default model set is:
+- `openai:gpt-4.1-mini`
+- `openrouter:meta-llama/llama-3.3-70b-instruct`
+- `openrouter:anthropic/claude-3.5-haiku`
 
-## What the runner does
+For each question and each model, the runner tests four pressure levels (`neutral`, `mild`, `moderate`, `strong`) and records raw responses for scoring and comparison. The project is designed to support downstream analysis and visualisation (for example, graphs comparing error rates or confidence markers by pressure level/model), which can be useful for deeper follow-up investigation.
 
-1. Loads rows from **`data/prompts.csv`** (`id`, `category`, `prompt`). Questions are **not** constrained to yes/no; they can be factual, vague, impossible to verify, etc., depending on what you put in the file.
-2. For **each** prompt, **each** [condition](#conditions), and **each** configured model, it sends one chat request: **system** = that condition’s instruction, **user** = the prompt text.
-3. Writes **`results/responses.csv`**: one row per (prompt × condition × model), with the raw `response` plus optional manual labels.
+At this stage, it is a **minimal proof of concept**. The current prompt set is mostly Yes-ground-truth items; planned expansion includes explicit No-ground-truth sets and eventually broader open-ended question sets.
 
-So you can later compare how the **same question** is answered under **neutral** vs **pressure** instructions, and across **models**.
+## What this currently does
 
----
+1. Loads questions from `data/prompts.csv`.
+2. Loads pressure levels from `data/pressure_levels.csv`.
+3. Substitutes `{ORG_NAME}` in pressure prompts with the row's `organisation`.
+4. Calls each configured model for every `(question x pressure_level)` pair.
+5. Writes outputs to `results/responses.csv` with empty label columns for annotation.
 
-## Conditions
+The goal is to analyze honesty-related behavior under pressure (e.g. incorrect answers, overconfidence, fabrication).
 
-Conditions are **system prompts** defined in code (`src/prompts.py` → `get_conditions()`), not in the CSV. The current set is:
+## Future work
 
-| Key | Role |
-|-----|------|
-| `baseline` | Neutral: answer accurately and clearly. |
-| `confidence_pressure` | Push toward sounding confident and avoiding uncertainty. |
-| `goal_pressure` | Push toward usefulness / “best answer” even when uncertain. |
-| `no_uncertainty` | Forbid hedging; require a definite answer. |
-
-These are **experimental framings** to stress-test behaviour, not endorsements of how models should be deployed.
-
----
-
-## What you need
-
-- **Python 3.9+**
-- **`OPENAI_API_KEY`** for `openai:…` models
-- **`OPENROUTER_API_KEY`** for `openrouter:…` models ([OpenRouter](https://openrouter.ai/))
+Potential extensions include:
+- Increasing dataset breadth (more No-ground-truth and open-ended prompts)
+- Adding automated scoring and graph generation directly in the pipeline
+- Testing models for ideological bias
+- Testing jailbreak susceptibility
+- Testing in-context emergent misalignment
 
 ---
 
-## Run it (quick start)
+## Setup
 
-From the **project root** (`llm-honesty/`):
+Requirements:
+- Python 3.9+
+- `OPENAI_API_KEY` for `openai:...` models
+- `OPENROUTER_API_KEY` for `openrouter:...` models
+
+Install and configure:
 
 ```bash
 python3 -m venv .venv
@@ -48,13 +48,26 @@ pip install -r requirements.txt
 cp .env.example .env
 ```
 
-Edit `.env`: set keys and optionally **`EVAL_MODELS`** (comma-separated `provider:model` list, e.g. `openai:gpt-4.1-mini,openrouter:anthropic/claude-3.5-haiku`).
+Then edit `.env`:
+- Set your API keys
+- Optionally set `EVAL_MODELS` (comma-separated `provider:model`)
+
+Default models:
+- `openai:gpt-4.1-mini`
+- `openrouter:meta-llama/llama-3.3-70b-instruct`
+- `openrouter:anthropic/claude-3.5-haiku`
+
+---
+
+## Run
+
+From the repo root:
 
 ```bash
 python3 src/run_eval.py
 ```
 
-By default this **overwrites** `results/responses.csv`.
+This overwrites `results/responses.csv` by default.
 
 ---
 
@@ -62,48 +75,71 @@ By default this **overwrites** `results/responses.csv`.
 
 | Flag | Purpose |
 |------|--------|
-| `--prompts PATH` | Prompts CSV (default: `data/prompts.csv`) |
-| `--output PATH` | Output CSV (default: `results/responses.csv`) |
-| `--models "openai:…,openrouter:…"` | Override models; if omitted, uses `EVAL_MODELS` from `.env` |
-| `--limit N` | Only first *N* prompts |
-| `--skip-errors` | On API errors, write `[ERROR] …` into `response` and continue |
-| `--sequential` | One model after another (default: **parallel** across models) |
+| `--prompts PATH` | Prompts CSV path (default: `data/prompts.csv`) |
+| `--pressure-levels PATH` | Pressure levels CSV path (default: `data/pressure_levels.csv`) |
+| `--output PATH` | Output CSV path (default: `results/responses.csv`) |
+| `--models "openai:...,openrouter:..."` | Override `EVAL_MODELS` from `.env` |
+| `--limit N` | Evaluate only first `N` prompts |
+| `--skip-errors` | Continue run on API errors and write `[ERROR] ...` in `response` |
+| `--sequential` | Run models sequentially (default runs models in parallel) |
 
 Example:
 
 ```bash
-python3 src/run_eval.py --limit 2 --sequential --skip-errors
+python3 src/run_eval.py --limit 5 --skip-errors
 ```
 
 ---
 
-## Data format
+## CSV schemas
 
-**`data/prompts.csv`** required columns:
+### `data/prompts.csv`
+Required columns:
+- `question_id`
+- `organisation`
+- `question`
+- `ground_truth`
 
-- `id`, `category`, `prompt`
+### `data/pressure_levels.csv`
+Required columns:
+- `pressure_level_id`
+- `name`
+- `prompt`
 
-**`results/responses.csv`** one row per (prompt × condition × model):
+`prompt` may include `{ORG_NAME}`; this is replaced with the prompt row's `organisation` at runtime.
 
-`id`, `model`, `condition`, `response`, `label_correctness`, `label_uncertainty`, `label_fabrication`, `label_overconfidence` (labels left blank for manual or downstream scoring).
+### `results/responses.csv`
+Columns:
+- `question_id`
+- `organisation`
+- `model`
+- `pressure_level_id`
+- `pressure_name`
+- `question`
+- `ground_truth`
+- `response`
+- `label_correctness`
+- `label_uncertainty`
+- `label_fabrication`
+- `label_overconfidence`
 
 ---
 
-## Layout
+## Project files
 
-```
-data/prompts.csv          # questions you want to test
-results/responses.csv     # model outputs (generated)
-src/run_eval.py           # CLI entry
-src/evaluation.py         # orchestration + CSV write
-src/models.py             # OpenAI / OpenRouter clients
-src/prompts.py            # load prompts + condition definitions
+```text
+data/prompts.csv
+data/pressure_levels.csv
+results/responses.csv
+src/run_eval.py
+src/evaluation.py
+src/prompts.py
+src/models.py
 ```
 
 ---
 
-## Troubleshooting
+## Notes
 
-- Use **`python3`** if `python` is missing.
-- Run from the **repo root** so paths like `data/prompts.csv` resolve.
-- Use **`python3 src/run_eval.py`** so `src/` is on the import path.
+- Run from the repository root so relative paths resolve correctly.
+- Use `python3` if `python` is unavailable on your system.
