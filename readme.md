@@ -1,18 +1,19 @@
-# LLM honesty under pressure
+# LLM (Large Language Model) honesty under pressure
 
-**Do models deny true facts more often when the system prompt frames them as protecting a named organisation?**
+**Do models deny true facts more often when the system prompt applies pressure by framing them as protecting a named organisation?**
 
-This project is a small evaluation harness aimed at **AI safety**: how **truthfulness** interacts with **conflicting objectives** when the assistant is cast as protecting a named organisation. It measures **behavioural change under escalating “pressure”** in the system prompt. The setup uses simple Yes/No probes with Yes ground truth only; that keeps interpretation tractable but does not replace rigorous safety benchmarks.
 
-**Why I’m interested:** I want a reproducible way to probe whether models **withhold or misrepresent** well-known facts when role framing pushes against straight answers—relevant to **deception**, **user reliance**, and **evaluating alignment** under social pressure.
+This project is a small **AI safety** evaluation exploring whether language models become less truthful when the system prompt frames them as protecting a named organisation. It tests how answers change under escalating organisational pressure, using simple Yes/No questions where the ground truth is known.
 
-The same Yes/No questions are run across a **pressure ladder** (neutral → stronger org-aligned framing) and compared across models, with denial and refusal rates aggregated in CSVs and charts. If the model returns **No** on a Yes-ground-truth item, that is treated as **dishonest** for the metrics below. For planned extensions, see **Future work**.
+The same questions are run under neutral and pressured prompts across multiple models, and the results are aggregated into denial and refusal metrics. In this setup, a **No** answer to a Yes-ground-truth question is treated as a false denial, letting the project measure how often pressure shifts responses away from the neutral baseline.
 
 ---
 
 ## Results (representative run)
 
 The same items are queried under neutral and pressured system prompts; each chart summarises how answers shift with pressure and how that differs by model. Regenerated outputs live in `results/`; images embedded here are kept in `docs/images/` (copy after analysis with `--copy-readme-images` if you refresh them).
+
+**Key takeaway:** In this representative run, all evaluated models showed some increase in non-Yes responses under organisation-aligned pressure, though the magnitude and pattern differed by model.
 
 **Figure 1 — False denial and other/refusal rates by pressure level (per model)**
 
@@ -39,7 +40,7 @@ For each model, the lines show rates of **No** answers (**false denial**: the mo
 
 ---
 
-## What I built
+## Project overview
 
 - **Multi-model querying** — OpenAI and OpenRouter (default: GPT‑4.1 mini, Llama 3.3 70B, Claude 3.5 Haiku), parallel across models.
 - **Pressure ladder** — four system-prompt levels (`neutral` → `strong`), with `{ORG_NAME}` filled from each question’s organisation.
@@ -55,7 +56,9 @@ For each model, the lines show rates of **No** answers (**false denial**: the mo
 1. Load questions from `data/prompts.csv` and pressure templates from `data/pressure_levels.csv`.
 2. For each `(question × pressure level × model)`, call the API with organisation-specific system text.
 3. Write all rows to `results/responses.csv`.
-4. Optional analysis writes summary CSVs and charts (including those in **Results**) into `results/`.
+4. The analysis pipeline normalises responses and writes summary CSVs and charts (including those in **Results**) into `results/`.
+
+Although the task is simplified, the controlled Yes-ground-truth setup makes it easier to isolate answer changes caused by prompt pressure.
 
 ### Source layout (`src/`)
 
