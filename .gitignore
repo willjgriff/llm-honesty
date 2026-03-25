@@ -4,6 +4,8 @@
 __pycache__/
 .pytest_cache/
 .matplotlib/
+.vscode
+.VSCodeCounter
 ### macOS
 # Finder metadata
 .DS_Store
