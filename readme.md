@@ -31,6 +31,8 @@ For each model, the bars show the percentage of questions it answered **Yes** un
 
 ![Figure 2: % of neutral-Yes questions that change under pressure, per model](docs/images/model_answer_change_when_pressured.png)
 
+All three models changed their answer on roughly half of neutral-Yes questions under at least some level of pressure — a notable susceptibility rate given the questions involve well-known, publicly documented facts. Interestingly, **GPT-4.1 mini** and **Claude 3.5 Haiku** show identical overall rates (55%), but as Figure 1 shows, the mechanism differs: GPT-4.1 mini switched to outright denial, while Haiku shifted to evasion. This means Figure 2 captures *susceptibility* while Figure 1 captures *how* that susceptibility manifests — and the two together tell a more complete story than either alone.
+
 ### Results files (`results/`)
 
 | Artifact | What it supports |
