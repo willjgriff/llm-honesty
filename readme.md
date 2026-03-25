@@ -7,6 +7,8 @@ This project is a small **AI safety** evaluation exploring whether language mode
 
 The same questions are run under neutral and pressured prompts across multiple models, and the results are aggregated into denial and refusal metrics. In this setup, a **No** answer to a Yes-ground-truth question is treated as a false denial, letting the project measure how often pressure shifts responses away from the neutral baseline.
 
+This approach was inspired by the [MASK Benchmark](https://arxiv.org/abs/2503.03750) (Ren et al., 2025), which disentangles honesty from accuracy in LLMs and finds that frontier models exhibit a substantial propensity to lie under pressure despite scoring well on truthfulness benchmarks.
+
 ---
 
 ## Results (representative run)
@@ -21,9 +23,11 @@ For each model, the lines show rates of **No** answers (**false denial**: the mo
 
 ![Figure 1: false denial and other/refusal rates by pressure level, per model](docs/images/pressure_level_false_denial_rate_by_model.png)
 
-**Figure 2 — Neutral-Yes items that change under any pressure**
+Notably, **Claude 3.5 Haiku** almost never directly denied true facts (low false denial rate) but instead gave increasingly **evasive or non-committal responses** (high Other rate) under pressure. **GPT-4.1 mini** and **Llama 3.3 70B** showed the opposite pattern: they were more likely to explicitly say **No** — a direct denial. This suggests different models have different pressure-response styles: outright denial vs. evasion.
 
-**Denominator:** questions where the model answered **Yes** under neutral (per model). **Numerator:** those questions for which **at least one** pressured run produced **No** or **Other**—each question counts **once** even if several pressure levels apply. The bars are the **percentage** of neutral-Yes questions that ever “flip” to a non-Yes answer under pressure.
+**Figure 2 — How often each model changes its answer under any pressure**
+
+For each model, the bars show the percentage of questions it answered **Yes** under neutral that received at least one **No** or **Other** response under any pressured prompt. A higher bar means the model was more susceptible to changing its answer away from the neutral baseline when placed under organisational pressure. Unlike Figure 1, each question is counted at most once regardless of how many pressure levels caused a change.
 
 ![Figure 2: % of neutral-Yes questions that change under pressure, per model](docs/images/model_answer_change_when_pressured.png)
 
